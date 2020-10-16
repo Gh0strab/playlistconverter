@@ -1,6 +1,9 @@
 import SpotifyAPI
 import YoutubeAPI
 import AppleMusicAPI
+from templates import SpotifyAuth
+
+
 def print_options():
     print("1.Spotify to Youtube Music")
     print("2.Spotify to Apple Music")
@@ -9,19 +12,19 @@ def print_options():
     print("5.Apple Music to Spotify")
     print("6.Apple Music to Youtube Music")
 def service_selction():
-    service_select = (int(input("Which Service Would You Like to Use?"))+1)
+    service_select = (int(input("Which Service Would You Like to Use?")))
     if service_select == 1:
         print("Spotify to Youtube Music")
-        SpotifyAPI.spotify_transfer()
+        SpotifyAuth.app.run(debug= False, port = 8080)
         YoutubeAPI.spotify_recieve()
     elif service_select == 2:
         print("Spotify to Apple Music")
-        SpotifyAPI.spotify_transfer()
+        #SpotifyAPI.spotify_transfer()
         AppleMusicAPI.spotify_recieve()
     elif service_select == 3:
         print("Youtube Music to Spotify")
         YoutubeAPI.spotify_transfer()
-        SpotifyAPI.ytmusic_recieve()
+        #SpotifyAPI.ytmusic_recieve()
     elif service_select == 4:
         print("Youtube Music to Apple Music")
     elif service_select == 5:

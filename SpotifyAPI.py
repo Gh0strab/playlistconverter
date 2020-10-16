@@ -1,22 +1,18 @@
 import requests
-from templates import SpotifyAuth
+#from templates import SpotifyAuth
 from urllib.parse import urlencode
 
 class SpotifyAPI(object):
     access_token = None
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
-    def preform_auth(self):
-        SpotifyAuth.app.run(debug=True, port=8080)
-        self.access_token = SpotifyAuth.callback()
-        print(access_token)
-    def list_playlists(self,access_token):
-        user_id = input("Please Enter Spotify User ID:")
+    def list_playlists(self,access_token,endpoint):
+        #user_id = input("Please Enter Spotify User ID:")
         limit = (int(input("What is The Maximum Number of Playlists You Wish to View?"))+1)
         header = {
             "Authorization": f"Bearer {access_token}"
         }
-        endpoint = f"https://api.spotify.com/v1/users/{user_id}/playlists"
+        #endpoint = f"https://api.spotify.com/v1/users/{user_id}/playlists"
         data = urlencode({"limit": limit, "offset": "0"})
         lookup_url = f"{endpoint}?{data}"
         r = requests.get(lookup_url, headers=header)
@@ -31,7 +27,7 @@ class SpotifyAPI(object):
             print("Playlist Name:",r["items"][playlist_count]["name"])
             playlist_names = r["items"][playlist_count]["name"]
             playlists.append(playlist_names)
-            total_tracks = r["items"][0]["tracks"]["total"]
+            total_tracks = r["items"][2]["tracks"]["total"]
             playlist_track_count.append(total_tracks)
             print("Total Tracks:",total_tracks)
             print("Made by:",r["items"][playlist_count]["owner"]["display_name"])
@@ -60,25 +56,37 @@ class SpotifyAPI(object):
         print(chosen_playlist)
         tracks = self.tracks = []
         albums = []
-        track_total = self.playlist_track_count[playlist_id_input]
+        track_total = self.playlist_track_count[0]
         track_count = 0
         while True:
-            if track_count == (int(track_total)-1):
+            #if track_count == (int(track_total)-1):
+            if track_count == 100 :
+                print('ahahaha')
                 break
             track_names = (r["items"][track_count]["track"]["name"])
             album_names = (r["items"][track_count]["track"]["album"]["name"])
             tracks.append(track_names)
             albums.append(album_names)
             track_count = track_count + 1
-            print(track_names)
-    def create_playlist(self,access_token):
-        user_id = input("Please Enter Spotify User ID:")
+            print(track_count,track_names)
+    def create_playlist(self,access_token,endpoint):
+        #user_id = input("Please Enter Spotify User ID:")
         header = {
-            "Accept": "application/json",
             "Content-Type": "application/json",
             "Authorization": f"Bearer {access_token}"
         }
-        endpoint = f"https://api.spotify.com/v1/users/{user_id}/playlists"
+        #endpoint = f"https://api.spotify.com/v1/users/{user_id}/playlists"
+        data = urlencode({"name":"placeholder name", "description": "New Playlist:", "public": True})
+        lookup_url = f"{endpoint}?{data}"
+        r = requests.post(lookup_url, headers=header)
+        r = r.json()
+        print(r)
+    def add_tracks(self,access_token,endpoint):
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+        #endpoint = f"https://api.spotify.com/v1/users/{user_id}/playlists"
         data = urlencode({"name":"placeholder name", "description": "New Playlist:", "public": True})
         lookup_url = f"{endpoint}?{data}"
         r = requests.post(lookup_url, headers=header)
@@ -91,13 +99,15 @@ class SpotifyAPI(object):
         track_names = self.tracks
         return track_names
 spotify = SpotifyAPI()
-spotify.preform_auth()
 access_token = spotify.access_token
-def spotify_transfer():
-    spotify.list_playlists(access_token)
+def spotify_transfer(access_token,endpoint):
+    spotify.list_playlists(access_token,endpoint)
     spotify.select_playlist(access_token)
-def spotify_recieve():
-    spotify.create_playlist(access_token)
+    return str(spotify.return_track_names())
+def spotify_recieve(access_token,endpoint):
+    spotify.create_playlist(access_token,endpoint)
+    meaningless = "ahahahaha playlistcreated"
+    return meaningless
 def return_chosen_playlist():
     return spotify.return_chosen_playlist()
 def return_track_names():

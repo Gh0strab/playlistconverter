@@ -1,8 +1,9 @@
 import json
-from flask import Flask, request, redirect, g, render_template
+from flask import abort, Flask, redirect, render_template, request, session, url_for
 import requests
 from urllib.parse import quote
 import SpotifyAPI
+import YoutubeAPI
 
 app = Flask(__name__)
 
@@ -13,6 +14,9 @@ CLIENT_SECRET = "0b2d8842c28c488494c8d3c4364873bb"
 # Spotify URLS
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
 SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
+SEARCH_ENDPOINT = 'https://api.spotify.com/v1/search'
+TRACK_ENDPOINT = 'https://api.spotify.com/v1/playlists/'
+
 SPOTIFY_API_BASE_URL = "https://api.spotify.com"
 API_VERSION = "v1"
 SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, API_VERSION)
@@ -63,4 +67,23 @@ def callback():
     refresh_token = response_data["refresh_token"]
     token_type = response_data["token_type"]
     expires_in = response_data["expires_in"]
-    return access_token
+
+    authorization_header = {"Authorization": "Bearer {}".format(access_token)}
+
+    user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
+    profile_response = requests.get(user_profile_api_endpoint, headers=authorization_header)
+    profile_data = json.loads(profile_response.text)
+
+    # Get user playlist data
+    playlist_api_endpoint = "{}/playlists".format(profile_data["href"])
+
+    playlists_response = requests.get(playlist_api_endpoint, headers=authorization_header)
+    print("1.Transfer")
+    print("2.Recieve")
+    user_input = int(input("Enter Service Number:"))
+    if user_input == 1:
+        meaningless_string = SpotifyAPI.spotify_transfer(access_token,playlist_api_endpoint)
+        YoutubeAPI.spotify_recieve()
+    elif user_input == 2:
+        meaningless_string = SpotifyAPI.spotify_recieve(access_token,playlist_api_endpoint)
+    return meaningless_string
